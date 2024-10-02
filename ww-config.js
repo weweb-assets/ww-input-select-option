@@ -16,6 +16,11 @@ export default {
             defaultValue: 'simple',
             section: 'settings',
         },
+        label: {
+            label: { en: 'Label' },
+            type: 'Text',
+            bindable: true,
+        },
         value: {
             label: { en: 'Value' },
             type: 'Text',
