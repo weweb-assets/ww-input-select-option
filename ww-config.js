@@ -3,6 +3,13 @@ export default {
         label: 'Select Option',
         icon: 'select',
     },
+    inherit: {
+        type: 'ww-layout',
+    },
+    options: {
+        autoByContent: true,
+        displayAllowedValues: ['flex', 'grid', 'inline-flex', 'inline-grid'],
+    },
     properties: {
         layout: {
             label: 'Layout',
