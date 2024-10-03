@@ -31,6 +31,7 @@ export default {
         const isDisabled = inject('_wwSelectIsDisabled');
         const isReadonly = inject('_wwSelectIsReadonly');
         const canUnselect = inject('_wwSelectCanUnselect');
+        const dropdownMethods = inject('_wwSelectDropdownMethods', {});
 
         const isOptionDisabled = computed(() => props.content.disabled);
         const label = computed(() => props.content.label);
@@ -49,6 +50,7 @@ export default {
         const updateValue = optionValue => {
             if (selectType.value === 'single') {
                 setValue(canUnselect.value && selectValue.value === optionValue ? null : optionValue);
+                dropdownMethods.closeDropdown();
             } else {
                 const currentValue = Array.isArray(selectValue.value) ? selectValue.value : [];
                 if (currentValue.includes(optionValue)) {
@@ -60,12 +62,10 @@ export default {
         };
 
         const handleClick = () => {
-            if (canInteract.value && props.content.selectOnClick) {
-                if (isInTrigger.value) {
-                    unselect();
-                } else {
-                    updateValue(props.content.value);
-                }
+            if (isInTrigger.value && canInteract.value && props.content.unselectOnClick) {
+                unselect();
+            } else if (!isInTrigger.value && canInteract.value && props.content.selectOnClick) {
+                updateValue(props.content.value);
             }
         };
 
