@@ -1,5 +1,5 @@
 <template>
-    <wwLayout class="ww-select-option" path="slot" @click="selectOnClick" />
+    <wwLayout class="ww-select-option" path="slot" @click="handleClick" />
 </template>
 
 <script>
@@ -12,7 +12,8 @@ export default {
         wwEditorState: { type: Object, required: true },
         /* wwEditor:end */
     },
-    setup(props) {
+    emits: ['update:sidepanel-content'],
+    setup(props, { emit }) {
         const isEditing = computed(() => {
             /* wwEditor:start */
             return props.wwEditorState.isEditing;
@@ -21,53 +22,23 @@ export default {
             return false;
         });
 
+        const isInTrigger = inject('_wwSelectInTrigger', ref(false));
+        if (isInTrigger.value) emit('update:sidepanel-content', { path: 'isInTrigger', value: true });
+
         const selectValue = inject('_wwSelectValue');
         const selectType = inject('_wwSelectType');
         const setValue = inject('_wwSelectSetValue');
         const isDisabled = inject('_wwSelectIsDisabled');
         const isReadonly = inject('_wwSelectIsReadonly');
         const canUnselect = inject('_wwSelectCanUnselect');
-        const registerOption = inject('registerOption');
-        const unregisterOption = inject('unregisterOption');
 
         const isOptionDisabled = computed(() => props.content.disabled);
         const label = computed(() => props.content.label);
         const value = computed(() => props.content.value);
 
-        const option = computed(() => ({
-            label: label.value,
-            value: value.value,
-            disabled: isOptionDisabled.value,
-        }));
-
-        function updateValue(optionValue) {
-            if (selectType.value === 'single') {
-                setValue(canUnselect.value && selectValue.value === optionValue ? null : optionValue);
-            } else {
-                const currentValue = Array.isArray(selectValue.value) ? selectValue.value : [];
-                const newValue = currentValue.includes(optionValue)
-                    ? canUnselect.value
-                        ? currentValue.filter(v => v !== optionValue)
-                        : currentValue
-                    : [...currentValue, optionValue];
-
-                setValue(newValue);
-            }
-        }
-
-        function selectOnClick() {
-            if (isEditing.value || !props.content.selectOnClick) return;
-            if (!isOptionDisabled.value || !isDisabled.value || !isReadonly.value) {
-                updateValue(props.content.value);
-            }
-        }
-
-        function select() {
-            if (isEditing.value) return;
-            if (!isOptionDisabled.value || !isDisabled.value || !isReadonly.value) {
-                updateValue(props.content.value);
-            }
-        }
+        const canInteract = computed(
+            () => !isEditing.value && !isOptionDisabled.value && !isDisabled.value && !isReadonly.value
+        );
 
         const isSelected = computed(() =>
             selectType.value === 'single'
@@ -75,36 +46,88 @@ export default {
                 : Array.isArray(selectValue.value) && selectValue.value.includes(props.content.value)
         );
 
-        const data = ref({
-            isSelected: isSelected.value,
-            isOptionDisabled: isOptionDisabled.value,
-            label: label.value,
-            value: value.value,
-        });
-
-        const methods = {
-            select: {
-                description: 'Select the current option',
-                method: select,
-                editor: {
-                    label: 'Select',
-                    elementName: 'Select Option',
-                    icon: 'cursor-click',
-                },
-            },
+        const updateValue = optionValue => {
+            if (selectType.value === 'single') {
+                setValue(canUnselect.value && selectValue.value === optionValue ? null : optionValue);
+            } else {
+                const currentValue = Array.isArray(selectValue.value) ? selectValue.value : [];
+                if (currentValue.includes(optionValue)) {
+                    setValue(canUnselect.value ? currentValue.filter(v => v !== optionValue) : currentValue);
+                } else {
+                    setValue([...currentValue, optionValue]);
+                }
+            }
         };
 
-        onMounted(() => {
-            registerOption(option.value);
-        });
+        const handleClick = () => {
+            if (canInteract.value && props.content.selectOnClick) {
+                if (isInTrigger.value) {
+                    unselect();
+                } else {
+                    updateValue(props.content.value);
+                }
+            }
+        };
 
-        onBeforeUnmount(() => {
-            unregisterOption(option.value.value);
-        });
+        const unselect = () => {
+            if (canInteract.value) {
+                if (selectType.value === 'single') {
+                    setValue(null);
+                } else {
+                    const currentValue = Array.isArray(selectValue.value) ? [...selectValue.value] : [];
+                    setValue(currentValue.filter(v => v !== props.content.value));
+                }
+            }
+        };
 
-        wwLib.wwElement.useRegisterElementLocalContext('selectOption', data, methods);
+        if (isInTrigger.value) {
+            const methods = {
+                unselect: {
+                    description: 'Unselect the current option',
+                    method: unselect,
+                    editor: { label: 'Unselect', elementName: 'Unselect Option', icon: 'cursor-click' },
+                },
+            };
 
-        return { selectOnClick };
+            wwLib.wwElement.useRegisterElementLocalContext('selectOption', null, methods);
+        } else {
+            const registerOption = inject('_wwRegisterOption');
+            const unregisterOption = inject('_wwUnregisterOption');
+
+            const option = computed(() => ({
+                label: label.value,
+                value: value.value,
+                disabled: isOptionDisabled.value,
+            }));
+
+            const select = () => {
+                if (canInteract.value) {
+                    updateValue(props.content.value);
+                }
+            };
+
+            const data = ref({
+                isSelected,
+                isOptionDisabled,
+                label,
+                value,
+            });
+
+            const methods = {
+                select: {
+                    description: 'Select the current option',
+                    method: select,
+                    editor: { label: 'Select', elementName: 'Select Option', icon: 'cursor-click' },
+                },
+            };
+
+            onMounted(() => registerOption(option.value));
+            onBeforeUnmount(() => unregisterOption(option.value.value));
+
+            wwLib.wwElement.useRegisterElementLocalContext('selectOption', data, methods);
+        }
+
+        return { handleClick };
     },
 };
 </script>
