@@ -10,6 +10,7 @@ export default {
         autoByContent: true,
         displayAllowedValues: ['flex', 'grid', 'inline-flex', 'inline-grid'],
     },
+    states: ['focused'],
     properties: {
         layout: {
             label: 'Layout',

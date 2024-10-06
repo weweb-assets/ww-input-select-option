@@ -1,9 +1,22 @@
 <template>
-    <wwLayout class="ww-select-option" path="slot" @click="handleClick" />
+    <div
+        class="ww-select-option"
+        ref="optionRef"
+        @click="handleClick"
+        @keydown="handleKeyDown"
+        :role="isInTrigger ? null : 'option'"
+        :id="optionId"
+        :aria-selected="isSelected"
+        :aria-disabled="isOptionDisabled"
+        :tabindex="focusedOptionIndex"
+    >
+        <wwLayout path="slot" />
+    </div>
 </template>
 
 <script>
 import { ref, inject, computed, onMounted, onBeforeUnmount } from 'vue';
+import useAccessibility from './useAccessibility';
 
 export default {
     props: {
@@ -20,6 +33,18 @@ export default {
             /* wwEditor:end */
             // eslint-disable-next-line no-unreachable
             return false;
+        });
+
+        const optionRef = ref(null);
+        const { optionId, focusedOptionIndex, handleKeyDown } = useAccessibility({
+            emit,
+            optionRef,
+            content: props.content,
+            handleSelect: () => {
+                if (!isInTrigger.value && canInteract.value && props.content.selectOnClick) {
+                    updateValue(props.content.value);
+                }
+            },
         });
 
         const isInTrigger = inject('_wwSelectInTrigger', ref(false));
@@ -127,9 +152,7 @@ export default {
             wwLib.wwElement.useRegisterElementLocalContext('selectOption', data, methods);
         }
 
-        return { handleClick };
+        return { optionRef, optionId, handleClick, handleKeyDown };
     },
 };
 </script>
-
-<style lang="scss" scoped></style>
