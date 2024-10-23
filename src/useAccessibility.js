@@ -1,9 +1,8 @@
 import { ref, watch, inject, nextTick } from 'vue';
 
-export default function useAccessibility({ emit, optionRef, content, handleSelect }) {
+export default function useAccessibility({ emit, optionRef, content }) {
     const optionId = `ww-select-option-${content.value}`;
     const activeDescendant = inject('_wwSelectActiveDescendant', ref(''));
-    const focusedOptionIndex = inject('_wwSelectFocusedOptionIndex', ref(0));
 
     watch(activeDescendant, () => {
         if (activeDescendant.value === optionId) {
@@ -19,16 +18,7 @@ export default function useAccessibility({ emit, optionRef, content, handleSelec
         }
     });
 
-    const handleKeyDown = event => {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            handleSelect();
-        }
-    };
-
     return {
         optionId,
-        focusedOptionIndex,
-        handleKeyDown,
     };
 }

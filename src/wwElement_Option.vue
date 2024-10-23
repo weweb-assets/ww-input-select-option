@@ -8,14 +8,13 @@
         :id="optionId"
         :aria-selected="isSelected"
         :aria-disabled="isOptionDisabled"
-        :tabindex="focusedOptionIndex"
     >
         <wwLayout path="slot" />
     </div>
 </template>
 
 <script>
-import { ref, inject, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, inject, computed, watch, onBeforeUnmount } from 'vue';
 import useAccessibility from './useAccessibility';
 
 export default {
@@ -36,15 +35,10 @@ export default {
         });
 
         const optionRef = ref(null);
-        const { optionId, focusedOptionIndex, handleKeyDown } = useAccessibility({
+        const { optionId, handleKeyDown } = useAccessibility({
             emit,
             optionRef,
             content: props.content,
-            handleSelect: () => {
-                if (!isInTrigger.value && canInteract.value && props.content.selectOnClick) {
-                    updateValue(props.content.value);
-                }
-            },
         });
 
         const isInTrigger = inject('_wwSelectInTrigger', ref(false));
@@ -55,12 +49,16 @@ export default {
         const setValue = inject('_wwSelectSetValue');
         const isDisabled = inject('_wwSelectIsDisabled');
         const isReadonly = inject('_wwSelectIsReadonly');
-        const canUnselect = inject('_wwSelectCanUnselect');
-        const dropdownMethods = inject('_wwSelectDropdownMethods', {});
+        const updateValue = inject('_wwSelectUpdateValue');
 
         const isOptionDisabled = computed(() => props.content.disabled);
         const label = computed(() => props.content.label);
         const value = computed(() => props.content.value);
+        const option = computed(() => ({
+            label: label.value,
+            value: value.value,
+            disabled: isOptionDisabled.value,
+        }));
 
         const canInteract = computed(
             () => !isEditing.value && !isOptionDisabled.value && !isDisabled.value && !isReadonly.value
@@ -71,20 +69,6 @@ export default {
                 ? selectValue.value === props.content.value
                 : Array.isArray(selectValue.value) && selectValue.value.includes(props.content.value)
         );
-
-        const updateValue = optionValue => {
-            if (selectType.value === 'single') {
-                setValue(canUnselect.value && selectValue.value === optionValue ? null : optionValue);
-                dropdownMethods.closeDropdown();
-            } else {
-                const currentValue = Array.isArray(selectValue.value) ? selectValue.value : [];
-                if (currentValue.includes(optionValue)) {
-                    setValue(canUnselect.value ? currentValue.filter(v => v !== optionValue) : currentValue);
-                } else {
-                    setValue([...currentValue, optionValue]);
-                }
-            }
-        };
 
         const handleClick = () => {
             if (isInTrigger.value && canInteract.value && props.content.unselectOnClick) {
@@ -119,12 +103,6 @@ export default {
             const registerOption = inject('_wwRegisterOption');
             const unregisterOption = inject('_wwUnregisterOption');
 
-            const option = computed(() => ({
-                label: label.value,
-                value: value.value,
-                disabled: isOptionDisabled.value,
-            }));
-
             const select = () => {
                 if (canInteract.value) {
                     updateValue(props.content.value);
@@ -146,8 +124,16 @@ export default {
                 },
             };
 
-            onMounted(() => registerOption(option.value));
-            onBeforeUnmount(() => unregisterOption(option.value.value));
+            watch(
+                [value, label],
+                () => {
+                    unregisterOption(option.value);
+                    registerOption(option.value);
+                },
+                { immediate: true }
+            );
+
+            onBeforeUnmount(() => unregisterOption(option.value));
 
             wwLib.wwElement.useRegisterElementLocalContext('selectOption', data, methods);
         }
