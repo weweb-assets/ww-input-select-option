@@ -54,20 +54,23 @@ export default {
         const isOptionDisabled = computed(() => props.content.disabled);
         const label = computed(() => props.content.label);
         const value = computed(() => props.content.value);
-        const option = computed(() => ({
-            label: label.value,
-            value: value.value,
-            disabled: isOptionDisabled.value,
-        }));
-
-        const canInteract = computed(
-            () => !isEditing.value && !isOptionDisabled.value && !isDisabled.value && !isReadonly.value
-        );
-
+        const data = computed(() => props.content.data);
         const isSelected = computed(() =>
             selectType.value === 'single'
                 ? selectValue.value === props.content.value
                 : Array.isArray(selectValue.value) && selectValue.value.includes(props.content.value)
+        );
+
+        const option = computed(() => ({
+            label: label.value,
+            value: value.value,
+            data: data.value,
+            disabled: isOptionDisabled.value,
+            isSelected: isSelected.value,
+        }));
+
+        const canInteract = computed(
+            () => !isEditing.value && !isOptionDisabled.value && !isDisabled.value && !isReadonly.value
         );
 
         const handleClick = () => {
@@ -114,6 +117,7 @@ export default {
                 isOptionDisabled,
                 label,
                 value,
+                data,
             });
 
             const methods = {

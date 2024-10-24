@@ -12,18 +12,6 @@ export default {
     },
     states: ['focused'],
     properties: {
-        layout: {
-            label: 'Layout',
-            type: 'TextSelect',
-            options: {
-                options: [
-                    { value: 'simple', label: 'Simple' },
-                    { value: 'free', label: 'Free layout' },
-                ],
-            },
-            defaultValue: 'simple',
-            section: 'settings',
-        },
         label: {
             label: { en: 'Label' },
             type: 'Text',
@@ -34,6 +22,30 @@ export default {
             label: { en: 'Value' },
             type: 'Text',
             bindable: true,
+        },
+        data: {
+            label: {
+                en: 'Data',
+            },
+            type: 'ObjectList',
+            options: {
+                useSchema: true,
+            },
+            bindable: true,
+            defaultValue: [],
+            /* wwEditor:start */
+            bindingValidation: {
+                validations: [
+                    {
+                        type: 'array',
+                    },
+                    {
+                        type: 'object',
+                    },
+                ],
+                tooltip: 'A collection or an array of data: \n\n`myCollection` or `[{}, {}, ...]`',
+            },
+            /* wwEditor:end */
         },
         disabled: {
             label: { en: 'Disabled' },
