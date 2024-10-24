@@ -54,7 +54,7 @@ export default {
         const isOptionDisabled = computed(() => props.content.disabled);
         const label = computed(() => props.content.label);
         const value = computed(() => props.content.value);
-        const data = computed(() => props.content.data);
+        const optionData = computed(() => props.content.data);
         const isSelected = computed(() =>
             selectType.value === 'single'
                 ? selectValue.value === props.content.value
@@ -64,7 +64,7 @@ export default {
         const option = computed(() => ({
             label: label.value,
             value: value.value,
-            data: data.value,
+            data: optionData.value,
             disabled: isOptionDisabled.value,
             isSelected: isSelected.value,
         }));
@@ -117,7 +117,7 @@ export default {
                 isOptionDisabled,
                 label,
                 value,
-                data,
+                data: optionData,
             });
 
             const methods = {
