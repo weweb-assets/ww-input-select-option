@@ -23,30 +23,6 @@ export default {
             type: 'Text',
             bindable: true,
         },
-        data: {
-            label: {
-                en: 'Data',
-            },
-            type: 'ObjectList',
-            options: {
-                useSchema: true,
-            },
-            bindable: true,
-            defaultValue: [],
-            /* wwEditor:start */
-            bindingValidation: {
-                validations: [
-                    {
-                        type: 'array',
-                    },
-                    {
-                        type: 'object',
-                    },
-                ],
-                tooltip: 'A collection or an array of data: \n\n`myCollection` or `[{}, {}, ...]`',
-            },
-            /* wwEditor:end */
-        },
         disabled: {
             label: { en: 'Disabled' },
             type: 'OnOff',
