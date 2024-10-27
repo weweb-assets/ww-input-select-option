@@ -43,7 +43,6 @@ export default {
 
         const isInTrigger = inject('_wwSelectInTrigger', ref(false));
         if (isInTrigger.value) emit('update:sidepanel-content', { path: 'isInTrigger', value: true });
-
         const selectValue = inject('_wwSelectValue');
         const selectType = inject('_wwSelectType');
         const setValue = inject('_wwSelectSetValue');
