@@ -24,7 +24,7 @@ export default {
         wwEditorState: { type: Object, required: true },
         /* wwEditor:end */
     },
-    emits: ['update:sidepanel-content'],
+    emits: ['update:sidepanel-content', 'add-state', 'remove-state'],
     setup(props, { emit }) {
         const isEditing = computed(() => {
             /* wwEditor:start */
@@ -94,7 +94,7 @@ export default {
                 unselect: {
                     description: 'Unselect the current option',
                     method: unselect,
-                    editor: { label: 'Unselect', elementName: 'Unselect Option', icon: 'cursor-click' },
+                    editor: { label: 'Unselect', group: 'Unselect Option', icon: 'cursor-click' },
                 },
             };
 
@@ -120,7 +120,7 @@ export default {
                 select: {
                     description: 'Select the current option',
                     method: select,
-                    editor: { label: 'Select', elementName: 'Select Option', icon: 'cursor-click' },
+                    editor: { label: 'Select', group: 'Select Option', icon: 'cursor-click' },
                 },
             };
 
