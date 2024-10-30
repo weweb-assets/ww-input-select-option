@@ -1,15 +1,16 @@
 import { ref, watch, inject, nextTick } from 'vue';
 
-export default function useAccessibility({ emit, optionRef, content }) {
-    const optionId = `ww-select-option-${content.value}`;
+export default function useAccessibility({ emit, optionElement, content }) {
+    const uid = wwLib.wwUtils.getUid();
+    const optionId = `ww-select-option-${content.value}-${uid}`;
     const activeDescendant = inject('_wwSelectActiveDescendant', ref(''));
 
     watch(activeDescendant, () => {
         if (activeDescendant.value === optionId) {
             nextTick(() => {
-                if (optionRef.value) {
-                    optionRef.value.focus();
-                    optionRef.value.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+                if (optionElement.value) {
+                    optionElement.value.focus();
+                    optionElement.value.scrollIntoView({ block: 'nearest', inline: 'nearest' });
                     emit('add-state', 'focused');
                 }
             });
@@ -19,6 +20,7 @@ export default function useAccessibility({ emit, optionRef, content }) {
     });
 
     return {
+        uid,
         optionId,
     };
 }

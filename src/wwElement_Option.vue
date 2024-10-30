@@ -1,5 +1,5 @@
 <template>
-    <div
+    <wwSimpleLayout
         class="ww-select-option"
         ref="optionRef"
         @click="handleClick"
@@ -10,11 +10,11 @@
         :aria-disabled="isOptionDisabled"
     >
         <wwLayout path="slot" />
-    </div>
+    </wwSimpleLayout>
 </template>
 
 <script>
-import { ref, inject, computed, watch, onBeforeUnmount } from 'vue';
+import { ref, unref, inject, computed, watch, onBeforeUnmount } from 'vue';
 import useAccessibility from './useAccessibility';
 
 export default {
@@ -35,9 +35,11 @@ export default {
         });
 
         const optionRef = ref(null);
+        const optionElement = computed(() => optionRef.value?.$el);
+
         const { optionId, handleKeyDown } = useAccessibility({
             emit,
-            optionRef,
+            optionElement,
             content: props.content,
         });
 
@@ -64,6 +66,7 @@ export default {
             value: value.value,
             disabled: isOptionDisabled.value,
             isSelected: isSelected.value,
+            optionId,
         }));
 
         const canInteract = computed(
@@ -127,13 +130,13 @@ export default {
             watch(
                 [value, label],
                 () => {
-                    unregisterOption(option.value);
-                    registerOption(option.value);
+                    unregisterOption(optionId);
+                    registerOption(optionId, unref(option));
                 },
                 { immediate: true }
             );
 
-            onBeforeUnmount(() => unregisterOption(option.value));
+            onBeforeUnmount(() => unregisterOption(optionId));
 
             wwLib.wwElement.useRegisterElementLocalContext('selectOption', data, methods);
         }
