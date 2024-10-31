@@ -34,15 +34,10 @@ export default {
             return false;
         });
 
+        const registerOption = inject('_wwRegisterOption');
+        const unregisterOption = inject('_wwUnregisterOption');
         const optionRef = ref(null);
         const optionElement = computed(() => optionRef.value?.$el);
-
-        const { optionId, handleKeyDown } = useAccessibility({
-            emit,
-            optionElement,
-            content: props.content,
-        });
-
         const isInTrigger = inject('_wwSelectInTrigger', ref(false));
         if (isInTrigger.value) emit('update:sidepanel-content', { path: 'isInTrigger', value: true });
         const selectValue = inject('_wwSelectValue');
@@ -61,6 +56,12 @@ export default {
                 : Array.isArray(selectValue.value) && selectValue.value.includes(props.content.value)
         );
 
+        const { optionId, handleKeyDown } = useAccessibility({
+            emit,
+            optionElement,
+            content: props.content,
+        });
+
         const option = computed(() => ({
             label: label.value,
             value: value.value,
@@ -68,6 +69,9 @@ export default {
             isSelected: isSelected.value,
             optionId,
         }));
+
+        unregisterOption(optionId);
+        registerOption(optionId, unref(option));
 
         const canInteract = computed(
             () => !isEditing.value && !isOptionDisabled.value && !isDisabled.value && !isReadonly.value
@@ -103,9 +107,6 @@ export default {
 
             wwLib.wwElement.useRegisterElementLocalContext('selectOption', null, methods);
         } else {
-            const registerOption = inject('_wwRegisterOption');
-            const unregisterOption = inject('_wwUnregisterOption');
-
             const select = () => {
                 if (canInteract.value) {
                     updateValue(props.content.value);
@@ -127,14 +128,10 @@ export default {
                 },
             };
 
-            watch(
-                [value, label],
-                () => {
-                    unregisterOption(optionId);
-                    registerOption(optionId, unref(option));
-                },
-                { immediate: true }
-            );
+            watch([value, label], () => {
+                unregisterOption(optionId);
+                registerOption(optionId, unref(option));
+            });
 
             onBeforeUnmount(() => unregisterOption(optionId));
 
