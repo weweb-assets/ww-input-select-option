@@ -23,6 +23,7 @@ export default {
         /* wwEditor:start */
         wwEditorState: { type: Object, required: true },
         /* wwEditor:end */
+        localData: { type: Object, default: () => ({}) },
     },
     emits: ['update:sidepanel-content', 'add-state', 'remove-state'],
     setup(props, { emit }) {
@@ -63,11 +64,12 @@ export default {
         });
 
         const option = computed(() => ({
+            optionId,
             label: label.value,
             value: value.value,
             disabled: isOptionDisabled.value,
             isSelected: isSelected.value,
-            optionId,
+            data: props.localData,
         }));
 
         unregisterOption(optionId);
