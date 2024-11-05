@@ -17,11 +17,22 @@ export default {
             type: 'Text',
             bindable: true,
             hidden: (_, sidepanelContent) => sidepanelContent.isInTrigger,
+            /* wwEditor:start */
+            propertyHelp: {
+                tooltip:
+                    'The label of the current option item. This will not automatically show this label on the screen, its purpose is accessibility and allowing easy bounding of the choice label.',
+            },
+            /* wwEditor:end */
         },
         value: {
             label: { en: 'Value' },
             type: 'Text',
             bindable: true,
+            /* wwEditor:start */
+            propertyHelp: {
+                tooltip: 'The unique value of every option item. This will be exposed outside the Select.',
+            },
+            /* wwEditor:end */
         },
         disabled: {
             label: { en: 'Disabled' },
@@ -43,7 +54,10 @@ export default {
             /* wwEditor:start */
             bindingValidation: {
                 type: 'boolean',
-                tooltip: 'A boolean that defines if the option is automatically selected on click: `true | false`',
+                tooltip: 'Whether the option should be automatically selected when clicked.',
+            },
+            propertyHelp: {
+                tooltip: 'Whether the option should be automatically selected when clicked.',
             },
             /* wwEditor:end */
             hidden: (_, sidepanelContent) => sidepanelContent.isInTrigger,
