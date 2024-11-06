@@ -35,8 +35,8 @@ export default {
             return false;
         });
 
-        const registerOption = inject('_wwRegisterOption');
-        const unregisterOption = inject('_wwUnregisterOption');
+        const registerOption = inject('_wwSelectRegisterOption');
+        const unregisterOption = inject('_wwSelectUnregisterOption');
         const optionRef = ref(null);
         const optionElement = computed(() => optionRef.value?.$el);
         const isInTrigger = inject('_wwSelectInTrigger', ref(false));
@@ -137,7 +137,14 @@ export default {
 
             onBeforeUnmount(() => unregisterOption(optionId));
 
-            wwLib.wwElement.useRegisterElementLocalContext('selectOption', data, methods);
+            const markdown = `### Select Option local informations
+
+- \`isSelected\`: Boolean indicating if the option is selected
+- \`isOptionDisabled\`: Boolean indicating if the option is disabled
+- \`label\`: The label of the option
+- \`value\`: The value of the option`;
+
+            wwLib.wwElement.useRegisterElementLocalContext('selectOption', data, methods, markdown);
         }
 
         return { optionRef, optionId, handleClick, handleKeyDown };
