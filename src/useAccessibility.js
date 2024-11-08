@@ -4,6 +4,7 @@ export default function useAccessibility({ emit, optionElement, content }) {
     const uid = wwLib.wwUtils.getUid();
     const optionId = `ww-select-option-${content.value}-${uid}`;
     const activeDescendant = inject('_wwSelectActiveDescendant', ref(''));
+    const focusFromOptionId = inject('_wwSelectFocusFromOptionId', () => {});
 
     watch(activeDescendant, () => {
         if (activeDescendant.value === optionId) {
@@ -22,5 +23,6 @@ export default function useAccessibility({ emit, optionElement, content }) {
     return {
         uid,
         optionId,
+        focusFromOptionId,
     };
 }

@@ -46,6 +46,7 @@ export default {
         const isDisabled = inject('_wwSelectIsDisabled');
         const isReadonly = inject('_wwSelectIsReadonly');
         const updateValue = inject('_wwSelectUpdateValue');
+        const focusSelectElement = inject('_wwSelectFocusSelectElement', () => {});
 
         const isOptionDisabled = computed(() => props.content.disabled);
         const label = computed(() => props.content.label);
@@ -56,7 +57,7 @@ export default {
                 : Array.isArray(selectValue.value) && selectValue.value.includes(props.content.value)
         );
 
-        const { optionId, handleKeyDown } = useAccessibility({
+        const { optionId, handleKeyDown, focusFromOptionId } = useAccessibility({
             emit,
             optionElement,
             content: props.content,
@@ -81,8 +82,11 @@ export default {
         const handleClick = () => {
             if (isInTrigger.value && canInteract.value && props.content.unselectOnClick) {
                 unselect();
+                focusFromOptionId(null);
             } else if (!isInTrigger.value && canInteract.value && props.content.selectOnClick) {
                 updateValue(props.content.value);
+                focusFromOptionId(optionId);
+                focusSelectElement();
             }
         };
 
