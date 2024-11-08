@@ -1,5 +1,6 @@
 <template>
     <wwSimpleLayout
+        inherit-component-style
         class="ww-select-option"
         ref="optionRef"
         @click="handleClick"
