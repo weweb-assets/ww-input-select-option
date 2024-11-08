@@ -1,6 +1,5 @@
 <template>
-    <wwSimpleLayout
-        inherit-component-style
+    <wwLayout
         class="ww-select-option"
         ref="optionRef"
         @click="handleClick"
@@ -9,9 +8,8 @@
         :id="optionId"
         :aria-selected="isSelected"
         :aria-disabled="isOptionDisabled"
-    >
-        <wwLayout path="slot" />
-    </wwSimpleLayout>
+        path="slot"
+    />
 </template>
 
 <script>
