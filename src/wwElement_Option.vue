@@ -15,6 +15,9 @@
 <script>
 import { ref, unref, inject, computed, watch, onBeforeUnmount } from 'vue';
 import useAccessibility from './useAccessibility';
+/* wwEditor:start */
+import useEditorHint from './editor/useEditorHint';
+/* wwEditor:end */
 
 export default {
     props: {
@@ -26,6 +29,10 @@ export default {
     },
     emits: ['update:sidepanel-content', 'add-state', 'remove-state'],
     setup(props, { emit }) {
+        /* wwEditor:start */
+        useEditorHint(emit);
+        /* wwEditor:end */
+
         const isEditing = computed(() => {
             /* wwEditor:start */
             return props.wwEditorState.isEditing;
@@ -34,18 +41,18 @@ export default {
             return false;
         });
 
-        const registerOption = inject('_wwSelectRegisterOption');
-        const unregisterOption = inject('_wwSelectUnregisterOption');
+        const registerOption = inject('_wwSelectRegisterOption', () => {});
+        const unregisterOption = inject('_wwSelectUnregisterOption', () => {});
         const optionRef = ref(null);
         const optionElement = computed(() => optionRef.value?.$el);
         const isInTrigger = inject('_wwSelectInTrigger', ref(false));
         if (isInTrigger.value) emit('update:sidepanel-content', { path: 'isInTrigger', value: true });
-        const selectValue = inject('_wwSelectValue');
-        const selectType = inject('_wwSelectType');
-        const setValue = inject('_wwSelectSetValue');
-        const isDisabled = inject('_wwSelectIsDisabled');
-        const isReadonly = inject('_wwSelectIsReadonly');
-        const updateValue = inject('_wwSelectUpdateValue');
+        const selectValue = inject('_wwSelectValue', ref(''));
+        const selectType = inject('_wwSelectType', ref('simple'));
+        const setValue = inject('_wwSelectSetValue', () => {});
+        const isDisabled = inject('_wwSelectIsDisabled', ref(false));
+        const isReadonly = inject('_wwSelectIsReadonly', ref(false));
+        const updateValue = inject('_wwSelectUpdateValue', () => {});
         const focusSelectElement = inject('_wwSelectFocusSelectElement', () => {});
 
         const isOptionDisabled = computed(() => props.content.disabled);

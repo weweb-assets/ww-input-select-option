@@ -2,6 +2,17 @@ export default {
     editor: {
         label: 'Select Option',
         icon: 'select',
+        hint: (_, sidepanelContent) => {
+            if (sidepanelContent.isInSelect === false) {
+                return {
+                    section: 'style',
+                    type: 'warning',
+                    text: 'Select Options must be placed inside a Select element.',
+                };
+            } else {
+                return null;
+            }
+        },
     },
     inherit: {
         type: 'ww-layout',
@@ -80,6 +91,11 @@ export default {
             defaultValue: [],
         },
         isInTrigger: {
+            hidden: true,
+            editorOnly: true,
+            defaultValue: false,
+        },
+        isInSelect: {
             hidden: true,
             editorOnly: true,
             defaultValue: false,
