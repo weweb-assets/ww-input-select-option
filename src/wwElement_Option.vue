@@ -27,7 +27,7 @@ export default {
         /* wwEditor:end */
         localData: { type: Object, default: () => ({}) },
     },
-    emits: ['update:sidepanel-content', 'add-state', 'remove-state'],
+    emits: ['update:content', 'update:sidepanel-content', 'add-state', 'remove-state'],
     setup(props, { emit }) {
         /* wwEditor:start */
         useEditorHint(emit);
@@ -40,6 +40,8 @@ export default {
             // eslint-disable-next-line no-unreachable
             return false;
         });
+
+        const { resolveMappingFormula } = wwLib.wwFormula.useFormula();
 
         const registerOption = inject('_wwSelectRegisterOption', () => {});
         const unregisterOption = inject('_wwSelectUnregisterOption', () => {});
@@ -54,10 +56,21 @@ export default {
         const isReadonly = inject('_wwSelectIsReadonly', ref(false));
         const updateValue = inject('_wwSelectUpdateValue', () => {});
         const focusSelectElement = inject('_wwSelectFocusSelectElement', () => {});
+        const mappingLabel = inject('_wwSelectMappingLabel', ref(null));
+        const mappingValue = inject('_wwSelectMappingValue', ref(null));
 
         const isOptionDisabled = computed(() => props.content.disabled);
-        const label = computed(() => props.content.label);
-        const value = computed(() => props.content.value);
+        const isMapping = mapping => mapping && typeof mapping === 'object' && mapping.code;
+        const label = computed(() => {
+            return isMapping(mappingLabel.value)
+                ? resolveMappingFormula(mappingLabel.value, props.localData)
+                : props.content.label;
+        });
+        const value = computed(() => {
+            return isMapping(mappingValue.value)
+                ? resolveMappingFormula(mappingValue.value, props.localData)
+                : props.content.value;
+        });
         const isSelected = computed(() =>
             selectType.value === 'single'
                 ? selectValue.value === props.content.value
@@ -76,7 +89,7 @@ export default {
             value: value.value,
             disabled: isOptionDisabled.value,
             isSelected: isSelected.value,
-            data: props.localData,
+            _data: props.localData,
         }));
 
         unregisterOption(optionId);
@@ -130,6 +143,7 @@ export default {
                 isOptionDisabled,
                 label,
                 value,
+                _data: props.localData,
             });
 
             const methods = {
@@ -151,8 +165,8 @@ export default {
 
 - \`isSelected\`: Boolean indicating if the option is selected
 - \`isOptionDisabled\`: Boolean indicating if the option is disabled
-- \`label\`: The label of the option
-- \`value\`: The value of the option`;
+- \`label\`: The label of the option (will be overwritten if defined in the Select root element)
+- \`value\`: The value of the option (will be overwritten if defined in the Select root element)`;
 
             wwLib.wwElement.useRegisterElementLocalContext('selectOption', data, methods, markdown);
         }
