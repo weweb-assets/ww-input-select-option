@@ -60,16 +60,18 @@ export default {
         const mappingValue = inject('_wwSelectMappingValue', ref(null));
 
         const isOptionDisabled = computed(() => props.content.disabled);
+        const labelProperty = computed(() => props.content.label);
+        const valueProperty = computed(() => props.content.value);
         const isMapping = mapping => mapping && typeof mapping === 'object' && mapping.code;
         const label = computed(() => {
             return isMapping(mappingLabel.value)
                 ? resolveMappingFormula(mappingLabel.value, props.localData)
-                : props.content.label;
+                : labelProperty.value;
         });
         const value = computed(() => {
             return isMapping(mappingValue.value)
                 ? resolveMappingFormula(mappingValue.value, props.localData)
-                : props.content.value;
+                : valueProperty.value;
         });
         const isSelected = computed(() =>
             selectType.value === 'single'
@@ -154,7 +156,7 @@ export default {
                 },
             };
 
-            watch([value, label], () => {
+            watch([valueProperty, labelProperty], () => {
                 unregisterOption(optionId);
                 registerOption(optionId, unref(option));
             });
