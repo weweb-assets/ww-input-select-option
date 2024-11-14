@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { ref, unref, inject, computed, watch, onBeforeUnmount } from 'vue';
+import { ref, unref, toValue, inject, computed, watch, onBeforeUnmount } from 'vue';
 import useAccessibility from './useAccessibility';
 /* wwEditor:start */
 import useEditorHint from './editor/useEditorHint';
@@ -56,27 +56,22 @@ export default {
         const isReadonly = inject('_wwSelectIsReadonly', ref(false));
         const updateValue = inject('_wwSelectUpdateValue', () => {});
         const focusSelectElement = inject('_wwSelectFocusSelectElement', () => {});
+        const isOptionDisabled = computed(() => props.content.disabled);
+
         const mappingLabel = inject('_wwSelectMappingLabel', ref(null));
         const mappingValue = inject('_wwSelectMappingValue', ref(null));
 
-        const isOptionDisabled = computed(() => props.content.disabled);
-        const labelProperty = computed(() => props.content.label);
-        const valueProperty = computed(() => props.content.value);
-        const isMapping = mapping => mapping && typeof mapping === 'object' && mapping.code;
-        const label = computed(() => {
-            return isMapping(mappingLabel.value)
-                ? resolveMappingFormula(mappingLabel.value, props.localData)
-                : labelProperty.value;
-        });
-        const value = computed(() => {
-            return isMapping(mappingValue.value)
-                ? resolveMappingFormula(mappingValue.value, props.localData)
-                : valueProperty.value;
-        });
+        const label = computed(
+            () => resolveMappingFormula(toValue(mappingLabel), props.localData) || props.content.label
+        );
+        const value = computed(
+            () => resolveMappingFormula(toValue(mappingValue), props.localData) || props.content.value
+        );
+
         const isSelected = computed(() =>
             selectType.value === 'single'
-                ? selectValue.value === props.content.value
-                : Array.isArray(selectValue.value) && selectValue.value.includes(props.content.value)
+                ? selectValue.value === value.value
+                : Array.isArray(selectValue.value) && selectValue.value.includes(value.value)
         );
 
         const { optionId, handleKeyDown, focusFromOptionId } = useAccessibility({
@@ -106,7 +101,7 @@ export default {
                 unselect();
                 focusFromOptionId(null);
             } else if (!isInTrigger.value && canInteract.value && props.content.selectOnClick) {
-                updateValue(props.content.value);
+                updateValue(value.value);
                 focusFromOptionId(optionId);
                 focusSelectElement();
             }
@@ -118,7 +113,7 @@ export default {
                     setValue(null);
                 } else {
                     const currentValue = Array.isArray(selectValue.value) ? [...selectValue.value] : [];
-                    setValue(currentValue.filter(v => v !== props.content.value));
+                    setValue(currentValue.filter(v => v !== value.value));
                 }
             }
         };
@@ -136,17 +131,47 @@ export default {
         } else {
             const select = () => {
                 if (canInteract.value) {
-                    updateValue(props.content.value);
+                    updateValue(value.value);
                 }
             };
 
+            /*
+             * Create a data ref with initial empty values, then use a watcher to update it.
+             * This pattern prevents circular dependencies that can occur when reactive refs
+             * directly reference each other. Instead of creating a complex web of reactive
+             * dependencies, we:
+             * 1. Start with a clean slate (empty values)
+             * 2. Use a watcher to explicitly update all values when any dependency changes
+             * 3. Keep the data flow unidirectional (computed props -> watcher -> data ref)
+             *
+             * The previous approach of directly referencing computed properties in the ref
+             * created an infinite loop because:
+             * - The ref would try to access the computed properties
+             * - The computed properties would trigger updates
+             * - These updates would cause the ref to update
+             * - Which would trigger the computed properties again... and so on
+             */
             const data = ref({
-                isSelected,
-                isOptionDisabled,
-                label,
-                value,
-                _data: props.localData,
+                isSelected: false,
+                isOptionDisabled: false,
+                label: '',
+                value: '',
+                _data: {},
             });
+
+            watch(
+                [isSelected, isOptionDisabled, label, value],
+                ([newIsSelected, newIsOptionDisabled, newLabel, newValue]) => {
+                    data.value = {
+                        isSelected: newIsSelected,
+                        isOptionDisabled: newIsOptionDisabled,
+                        label: newLabel,
+                        value: newValue,
+                        _data: props.localData,
+                    };
+                },
+                { immediate: true }
+            );
 
             const methods = {
                 select: {
@@ -155,11 +180,6 @@ export default {
                     editor: { label: 'Select', group: 'Select Option', icon: 'cursor-click' },
                 },
             };
-
-            watch([valueProperty, labelProperty], () => {
-                unregisterOption(optionId);
-                registerOption(optionId, unref(option));
-            });
 
             onBeforeUnmount(() => unregisterOption(optionId));
 
