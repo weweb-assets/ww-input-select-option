@@ -27,6 +27,7 @@ export default {
             label: { en: 'Label' },
             type: 'Text',
             bindable: true,
+            section: 'settings',
             hidden: (_, sidepanelContent) => sidepanelContent.isInTrigger,
             /* wwEditor:start */
             propertyHelp: {
@@ -39,17 +40,31 @@ export default {
             label: { en: 'Value' },
             type: 'Text',
             bindable: true,
+            section: 'settings',
             /* wwEditor:start */
             propertyHelp: {
                 tooltip: 'The unique value of every option item. This will be exposed outside the Select.',
             },
             /* wwEditor:end */
         },
+        /* wwEditor:start */
+        selectTypeWarning: {
+            type: 'InfoBox',
+            section: 'settings',
+            options: (_, sidepanelContent) => ({
+                title: sidepanelContent.isInTrigger ? 'Value override' : 'Label and value override',
+                content: sidepanelContent.isInTrigger
+                    ? `When "Value per item" is configured in the Select root element, it will override any value defined in this Option element.`
+                    : `When "Label per item" and "Value per item" are configured in the Select root element, they will override any label and value defined in this Option element.`,
+            }),
+        },
+        /* wwEditor:end */
         disabled: {
             label: { en: 'Disabled' },
             type: 'OnOff',
             bindable: true,
             defaultValue: false,
+            section: 'settings',
             /* wwEditor:start */
             bindingValidation: {
                 type: 'boolean',
@@ -62,6 +77,7 @@ export default {
             type: 'OnOff',
             bindable: true,
             defaultValue: true,
+            section: 'settings',
             /* wwEditor:start */
             bindingValidation: {
                 type: 'boolean',
