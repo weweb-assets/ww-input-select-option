@@ -1,11 +1,8 @@
 {
-    "name": "ww-select",
+    "name": "ww-select-option",
     "repository": {
         "type": "git",
-        "url": "https://github.com/weweb-assets/ww-select"
-    },
-    "weweb": {
-        "componentPath": "./src/wwElement_Option.vue"
+        "url": "https://github.com/weweb-assets/ww-select-option"
     },
     "version": "1.0.0",
     "scripts": {
