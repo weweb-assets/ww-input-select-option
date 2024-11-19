@@ -3,8 +3,8 @@ import { ref, watch, inject, nextTick } from 'vue';
 export default function useAccessibility({ emit, optionElement, content }) {
     const uid = wwLib.wwUtils.getUid();
     const optionId = `ww-select-option-${content.value}-${uid}`;
-    const activeDescendant = inject('_wwSelectActiveDescendant', ref(''));
-    const focusFromOptionId = inject('_wwSelectFocusFromOptionId', () => {});
+    const activeDescendant = inject('_wwSelect:activeDescendant', ref(''));
+    const focusFromOptionId = inject('_wwSelect:focusFromOptionId', () => {});
 
     watch(activeDescendant, () => {
         if (activeDescendant.value === optionId) {

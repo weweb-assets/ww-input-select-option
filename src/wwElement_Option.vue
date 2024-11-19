@@ -43,23 +43,23 @@ export default {
 
         const { resolveMappingFormula } = wwLib.wwFormula.useFormula();
 
-        const registerOption = inject('_wwSelectRegisterOption', () => {});
-        const unregisterOption = inject('_wwSelectUnregisterOption', () => {});
+        const registerOption = inject('_wwSelect:registerOption', () => {});
+        const unregisterOption = inject('_wwSelect:unregisterOption', () => {});
         const optionRef = ref(null);
         const optionElement = computed(() => optionRef.value?.$el);
-        const isInTrigger = inject('_wwSelectInTrigger', ref(false));
+        const isInTrigger = inject('_wwSelect:isInTrigger', ref(false));
         if (isInTrigger.value) emit('update:sidepanel-content', { path: 'isInTrigger', value: true });
-        const selectValue = inject('_wwSelectValue', ref(''));
-        const selectType = inject('_wwSelectType', ref('simple'));
-        const setValue = inject('_wwSelectSetValue', () => {});
-        const isDisabled = inject('_wwSelectIsDisabled', ref(false));
-        const isReadonly = inject('_wwSelectIsReadonly', ref(false));
-        const updateValue = inject('_wwSelectUpdateValue', () => {});
-        const focusSelectElement = inject('_wwSelectFocusSelectElement', () => {});
+        const selectValue = inject('_wwSelect:value', ref(''));
+        const selectType = inject('_wwSelect:type', ref('simple'));
+        const setValue = inject('_wwSelect:setValue', () => {});
+        const isDisabled = inject('_wwSelect:isDisabled', ref(false));
+        const isReadonly = inject('_wwSelect:isReadonly', ref(false));
+        const updateValue = inject('_wwSelect:updateValue', () => {});
+        const focusSelectElement = inject('_wwSelect:focusSelectElement', () => {});
         const isOptionDisabled = computed(() => props.content.disabled);
 
-        const mappingLabel = inject('_wwSelectMappingLabel', ref(null));
-        const mappingValue = inject('_wwSelectMappingValue', ref(null));
+        const mappingLabel = inject('_wwSelect:mappingLabel', ref(null));
+        const mappingValue = inject('_wwSelect:mappingValue', ref(null));
 
         const label = computed(
             () => resolveMappingFormula(toValue(mappingLabel), props.localData) || props.content.label
@@ -107,6 +107,7 @@ export default {
             }
         };
 
+        // Maybe => move this to the select component (selectType too + new isSelected function in the select)
         const unselect = () => {
             if (canInteract.value) {
                 if (selectType.value === 'single') {
@@ -117,6 +118,7 @@ export default {
                 }
             }
         };
+        
 
         if (isInTrigger.value) {
             const methods = {
